@@ -1,0 +1,32 @@
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+
+# Android
+android/.gradle
+android/local.properties
+android/key.properties
+*.jks
+*.keystore
+
+# iOS & macOS
+ios/Pods/
+macos/Pods/
+*.xcworkspace
+*.xcuserdata
+
+# Environment
+.env
+local.properties
+
+# IDE
+.idea/
+.vscode/settings.json
+*.swp
+.DS_Store
