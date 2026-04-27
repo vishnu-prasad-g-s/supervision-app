@@ -310,6 +310,196 @@
     font-weight: 300; letter-spacing: 0.05em;
   }
 
+  /* ── WHAT YOU NEED ── */
+  .needs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    max-width: 1000px; margin: 0 auto;
+  }
+  .need-card {
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem 1.75rem;
+    background: var(--white);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .need-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.07);
+  }
+  .need-card.optional-card {
+    border-color: var(--border);
+    background: var(--light);
+  }
+  .need-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: var(--black);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+  .need-icon svg { width: 22px; height: 22px; }
+  .need-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem; color: var(--black);
+    margin-bottom: 0.5rem;
+  }
+  .need-desc {
+    font-size: 0.85rem; color: var(--silver);
+    line-height: 1.65; font-weight: 300;
+    margin-bottom: 1.25rem;
+  }
+  .need-action {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.8rem; font-weight: 500;
+    text-decoration: none; color: var(--black);
+    border: 1px solid var(--border);
+    border-radius: 100px; padding: 0.4rem 1rem;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .need-action:hover { background: var(--light); border-color: #bbb; }
+  .need-action.dark {
+    background: var(--black); color: var(--white);
+    border-color: var(--black);
+  }
+  .need-action.dark:hover { opacity: 0.8; background: var(--black); }
+  .need-price {
+    font-size: 0.75rem; color: var(--silver);
+    font-weight: 300; margin-bottom: 0.75rem;
+  }
+  .need-badge {
+    display: inline-block;
+    font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--silver); border: 1px solid var(--border);
+    border-radius: 100px; padding: 0.2rem 0.7rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* ── INTELLIGENT FEATURES ── */
+  .intel-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1000px; margin: 0 auto;
+  }
+  .intel-card {
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.25rem 2rem;
+    background: var(--white);
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .intel-card:hover {
+    background: var(--light);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+  }
+  .intel-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--light); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+  .intel-icon svg { width: 22px; height: 22px; }
+  .intel-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem; color: var(--black);
+    margin-bottom: 0.5rem;
+  }
+  .intel-desc {
+    font-size: 0.875rem; color: var(--silver);
+    line-height: 1.7; font-weight: 300;
+    margin-bottom: 1rem;
+  }
+  .intel-tag {
+    font-size: 0.7rem; font-weight: 500;
+    color: var(--black); letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comparison-wrapper {
+    max-width: 900px; margin: 0 auto;
+    border: 1px solid var(--border); border-radius: 20px;
+    overflow: hidden;
+  }
+  .comparison-table {
+    width: 100%; border-collapse: collapse;
+  }
+  .comparison-table th, .comparison-table td {
+    padding: 1.1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .comparison-table tr:last-child td { border-bottom: none; }
+  .comparison-table thead th {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem; color: var(--silver);
+    font-weight: 400; background: var(--light);
+    border-bottom: 1px solid var(--border);
+  }
+  .comparison-table thead th.highlight-col {
+    background: var(--black); color: var(--white);
+    font-size: 1rem;
+  }
+  .comparison-table td { color: var(--silver); font-weight: 300; }
+  .comparison-table td.highlight-col {
+    background: var(--black); color: var(--white);
+    font-weight: 400;
+  }
+  .comparison-table tr:last-child td.highlight-col {
+    border-radius: 0 0 0 0;
+  }
+  .check {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(34,197,94,0.12);
+    margin-right: 8px; flex-shrink: 0;
+  }
+  .check svg { width: 11px; height: 11px; }
+  .cross {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(239,68,68,0.1);
+    margin-right: 8px; flex-shrink: 0;
+  }
+  .cross svg { width: 11px; height: 11px; }
+  .cell-inner { display: flex; align-items: center; }
+  .comparison-row-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem; color: var(--black);
+    font-weight: 400;
+  }
+
+  /* ── PRIVACY BAND ── */
+  .privacy-band {
+    background: var(--black);
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  .privacy-band-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+  }
+  .privacy-band-icon svg { width: 26px; height: 26px; }
+  .privacy-band h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    color: var(--white); margin-bottom: 1rem;
+  }
+  .privacy-band p {
+    font-size: 0.95rem; color: rgba(255,255,255,0.45);
+    font-weight: 300; line-height: 1.8;
+    max-width: 600px; margin: 0 auto;
+  }
+
   /* CTA */
   .cta-section {
     text-align: center; padding: 7rem 2rem;
@@ -374,6 +564,7 @@
     .stats-row { flex-direction: column; }
     .stat { border-right: none; border-bottom: 1px solid var(--border); }
     .stat:last-child { border-bottom: none; }
+    .comparison-table th, .comparison-table td { padding: 0.85rem 1rem; font-size: 0.8rem; }
   }
 </style>
 </head>
@@ -392,7 +583,9 @@
   </a>
   <div class="nav-links">
     <a href="#features">Features</a>
+    <a href="#needs">What You Need</a>
     <a href="#how">How it works</a>
+    <a href="#why">Why SuperVision</a>
     <a href="https://github.com/vishnuprasadgs/supervision-app" target="_blank">GitHub</a>
     <a href="https://github.com/vishnuprasadgs/supervision-app/releases" class="nav-cta">Download</a>
   </div>
@@ -467,8 +660,79 @@
   </div>
 </section>
 
+<!-- WHAT YOU NEED -->
+<section class="section" id="needs" style="padding-top: 3rem; background: var(--light);">
+  <p class="section-label reveal">Complete setup</p>
+  <h2 class="section-title reveal">Everything you need,<br>at a fraction of the cost</h2>
+  <p class="section-sub reveal">Complete independence for under $50 — no subscriptions, no expensive hardware.</p>
+
+  <div class="needs-grid">
+    <!-- SuperVision App -->
+    <div class="need-card reveal">
+      <div class="need-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </div>
+      <div class="need-title">SuperVision App</div>
+      <div class="need-desc">Free, open source, and always private. On-device AI processing — no Play Store needed.</div>
+      <a href="https://github.com/vishnuprasadgs/supervision-app/releases" class="need-action dark" target="_blank">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        APK on GitHub
+      </a>
+    </div>
+
+    <!-- Phone Harness -->
+    <div class="need-card reveal">
+      <div class="need-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round">
+          <rect x="5" y="2" width="14" height="20" rx="2"/>
+          <line x1="9" y1="9" x2="15" y2="9"/>
+          <line x1="9" y1="13" x2="12" y2="13"/>
+        </svg>
+      </div>
+      <div class="need-title">Phone Harness</div>
+      <div class="need-desc">Comfortable chest mount for completely hands-free use. Keep your camera positioned perfectly while you move.</div>
+      <div class="need-price">~£20 · Ships via Amazon</div>
+      <a href="https://amazon.co.uk" class="need-action" target="_blank">View on Amazon ↗</a>
+    </div>
+
+    <!-- 8BitDo Micro -->
+    <div class="need-card reveal">
+      <div class="need-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round">
+          <rect x="2" y="6" width="20" height="12" rx="4"/>
+          <path d="M6 10h4M8 8v4"/>
+          <circle cx="16" cy="10" r="1" fill="white"/>
+          <circle cx="18" cy="12" r="1" fill="white"/>
+        </svg>
+      </div>
+      <div class="need-title">8BitDo Micro</div>
+      <div class="need-desc">Tiny wireless controller for instant access to SuperVision. Navigate without ever touching your screen.</div>
+      <div class="need-price">~£20 · Ships via Amazon</div>
+      <a href="https://amazon.co.uk" class="need-action" target="_blank">View on Amazon ↗</a>
+    </div>
+
+    <!-- Bone Conducting Headphones -->
+    <div class="need-card optional-card reveal">
+      <div class="need-icon" style="background: var(--border);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round">
+          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+        </svg>
+      </div>
+      <div class="need-badge">Optional</div>
+      <div class="need-title">Bone Conducting Headphones</div>
+      <div class="need-desc">Hear AI responses while staying fully aware of your surroundings. Safe for outdoor and public use.</div>
+      <a href="https://amazon.co.uk" class="need-action" target="_blank">View on Amazon ↗</a>
+    </div>
+  </div>
+</section>
+
 <!-- FEATURES -->
-<section class="section" id="features" style="padding-top: 3rem;">
+<section class="section" id="features" style="padding-top: 5rem;">
   <p class="section-label reveal">What it does</p>
   <h2 class="section-title reveal">Everything you need,<br>nothing you don't</h2>
   <p class="section-sub reveal">Built for speed, privacy, and accessibility.</p>
@@ -542,6 +806,87 @@
   </div>
 </section>
 
+<!-- INTELLIGENT FEATURES -->
+<section class="section" style="padding-top: 2rem; background: var(--light);">
+  <p class="section-label reveal">Intelligent features</p>
+  <h2 class="section-title reveal">That actually understand</h2>
+  <p class="section-sub reveal">Unlike apps that just read text aloud, SuperVision understands context and gives you exactly what you need to know.</p>
+
+  <div class="intel-features-grid">
+    <div class="intel-card reveal">
+      <div class="intel-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round">
+          <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44l-3.01-9.29A2.5 2.5 0 0 1 6.35 7"/>
+          <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44l3.01-9.29A2.5 2.5 0 0 0 17.65 7"/>
+        </svg>
+      </div>
+      <div class="intel-title">Context-Aware AI</div>
+      <div class="intel-desc">Ask "What's the burger price?" and get just that — not the entire menu. SuperVision understands what you actually need.</div>
+      <div class="intel-tag">Powered by Gemma</div>
+    </div>
+
+    <div class="intel-card reveal">
+      <div class="intel-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div class="intel-title">Natural Conversations</div>
+      <div class="intel-desc">Have real conversations with context. Ask follow-up questions naturally, just like talking to a sighted assistant.</div>
+      <div class="intel-tag">Maintains conversation history</div>
+    </div>
+
+    <div class="intel-card reveal">
+      <div class="intel-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round">
+          <rect x="2" y="6" width="20" height="12" rx="4"/>
+          <path d="M6 10h4M8 8v4"/>
+          <circle cx="16" cy="10" r="1.2" fill="#0a0a0a"/>
+          <circle cx="18" cy="12" r="1.2" fill="#0a0a0a"/>
+        </svg>
+      </div>
+      <div class="intel-title">8BitDo Controller</div>
+      <div class="intel-desc">Quick access to common questions with buttons. Navigate without touching the screen. Hold to dictate custom questions.</div>
+      <div class="intel-tag">Fully customisable buttons</div>
+    </div>
+
+    <div class="intel-card reveal">
+      <div class="intel-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round">
+          <rect x="5" y="2" width="14" height="20" rx="2"/>
+          <circle cx="12" cy="17" r="1" fill="#0a0a0a"/>
+        </svg>
+      </div>
+      <div class="intel-title">Hands-Free Design</div>
+      <div class="intel-desc">Use any compatible phone harness to keep your device perfectly positioned while you use your cane. Move freely.</div>
+      <div class="intel-tag">Works with standard harnesses</div>
+    </div>
+
+    <div class="intel-card reveal">
+      <div class="intel-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <div class="intel-title">Instant Response</div>
+      <div class="intel-desc">On-device AI means no internet needed. Get instant answers anywhere — underground, rural areas, or abroad.</div>
+      <div class="intel-tag">Works 100% offline</div>
+    </div>
+
+    <div class="intel-card reveal">
+      <div class="intel-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <div class="intel-title">Affordable Access</div>
+      <div class="intel-desc">Just the cost of a phone harness and controller. No $4,000 devices, no monthly subscriptions. Real accessibility for everyone.</div>
+      <div class="intel-tag">100x cheaper than OrCam</div>
+    </div>
+  </div>
+</section>
+
 <!-- HOW IT WORKS -->
 <section class="section steps" id="how">
   <p class="section-label reveal">Simple setup</p>
@@ -571,6 +916,75 @@
     </div>
   </div>
 </section>
+
+<!-- WHY SUPERVISION IS DIFFERENT -->
+<section class="section" id="why" style="padding-top: 5rem;">
+  <p class="section-label reveal">The difference</p>
+  <h2 class="section-title reveal">Why SuperVision<br>is different</h2>
+  <p class="section-sub reveal">Intelligent, private, and accessible at a fraction of traditional costs.</p>
+
+  <div class="comparison-wrapper reveal">
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th style="width:30%">Feature</th>
+          <th style="width:23%">Traditional Apps</th>
+          <th style="width:23%">OrCam MyEye</th>
+          <th class="highlight-col" style="width:24%">SuperVision</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="comparison-row-label">Context understanding</td>
+          <td><div class="cell-inner"><span class="cross"><svg viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg></span>Reads verbatim</div></td>
+          <td><div class="cell-inner"><span class="cross"><svg viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg></span>Limited</div></td>
+          <td class="highlight-col"><div class="cell-inner" style="color:white"><span class="check" style="background:rgba(255,255,255,0.12)"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>Intelligent responses</div></td>
+        </tr>
+        <tr>
+          <td class="comparison-row-label">Works offline</td>
+          <td><div class="cell-inner"><span class="cross"><svg viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg></span>Requires internet</div></td>
+          <td><div class="cell-inner"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>Yes</div></td>
+          <td class="highlight-col"><div class="cell-inner" style="color:white"><span class="check" style="background:rgba(255,255,255,0.12)"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>100% offline</div></td>
+        </tr>
+        <tr>
+          <td class="comparison-row-label">Total cost</td>
+          <td><div class="cell-inner"><span class="cross"><svg viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg></span>Monthly fees</div></td>
+          <td><div class="cell-inner"><span class="cross"><svg viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg></span>$4,000+</div></td>
+          <td class="highlight-col"><div class="cell-inner" style="color:white"><span class="check" style="background:rgba(255,255,255,0.12)"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>Under $50</div></td>
+        </tr>
+        <tr>
+          <td class="comparison-row-label">Data privacy</td>
+          <td><div class="cell-inner"><span class="cross"><svg viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg></span>Cloud uploads</div></td>
+          <td><div class="cell-inner"><span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>On-device</div></td>
+          <td class="highlight-col"><div class="cell-inner" style="color:white"><span class="check" style="background:rgba(255,255,255,0.12)"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>Complete privacy</div></td>
+        </tr>
+        <tr>
+          <td class="comparison-row-label">AI model</td>
+          <td><div class="cell-inner"><span class="cross"><svg viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg></span>Basic OCR</div></td>
+          <td><div class="cell-inner"><span class="cross"><svg viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg></span>Limited AI</div></td>
+          <td class="highlight-col"><div class="cell-inner" style="color:white"><span class="check" style="background:rgba(255,255,255,0.12)"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>Google Gemma</div></td>
+        </tr>
+        <tr>
+          <td class="comparison-row-label">Open source</td>
+          <td><div class="cell-inner"><span class="cross"><svg viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg></span>Closed</div></td>
+          <td><div class="cell-inner"><span class="cross"><svg viewBox="0 0 12 12" fill="none" stroke="#ef4444" stroke-width="2.5"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg></span>Proprietary</div></td>
+          <td class="highlight-col"><div class="cell-inner" style="color:white"><span class="check" style="background:rgba(255,255,255,0.12)"><svg viewBox="0 0 12 12" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></span>Fully open source</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PRIVACY BAND -->
+<div class="privacy-band">
+  <div class="privacy-band-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+  </div>
+  <h3>Your Privacy is Protected</h3>
+  <p>Everything happens on your device. Your photos never leave your phone, aren't saved anywhere, and aren't sent to any servers. Perfect privacy for sensitive environments like medical appointments, legal offices, or personal spaces.</p>
+</div>
 
 <!-- CTA -->
 <section class="cta-section">
