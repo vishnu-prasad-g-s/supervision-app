@@ -115,12 +115,12 @@ class ChatBubble extends StatelessWidget {
           decoration: BoxDecoration(
             // User messages: blue, AI messages: light gray
             color: msg.isUser ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A2E),
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 14.0,
-              vertical: 10.0,
+              vertical: 12.0,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

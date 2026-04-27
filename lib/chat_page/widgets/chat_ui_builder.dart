@@ -22,9 +22,9 @@ class ChatUIBuilder {
         'SuperVision',
         style: TextStyle(
           color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.2,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.3,
         ),
       ),
       actions: [
@@ -64,7 +64,7 @@ class ChatUIBuilder {
     required bool isResetting,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: FocusTraversalGroup(
         policy: WidgetOrderTraversalPolicy(),
         child: Row(
@@ -142,29 +142,29 @@ class ChatUIBuilder {
       onPressed: disabled ? null : onPressed,
       disabled: disabled,
       child: SizedBox(
-        height: 40,
+        height: 36,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: null, // Handled by semantic wrapper
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(100),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(100),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, color: iconColor, size: 20),
+                  Icon(icon, color: iconColor, size: 16),
                   const SizedBox(width: 8),
                   Text(
                     label,
                     style: TextStyle(
                       color: textColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
                     ),
                   ),
                 ],
