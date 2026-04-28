@@ -263,7 +263,7 @@ class DownloadPageLogic {
       // Launch web authentication flow - this opens a browser
       final result = await FlutterWebAuth2.authenticate(
         url: authUrl,
-        callbackUrlScheme: 'com.tommasogiovannini.gemma', // Custom URL scheme
+        callbackUrlScheme: 'com.vishnuprasadgs.myaiapp', // Custom URL scheme
       );
 
       // Parse the callback URL to extract the authorization code

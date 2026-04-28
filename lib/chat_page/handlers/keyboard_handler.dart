@@ -12,8 +12,24 @@ class GameIntent extends Intent {
   final LogicalKeyboardKey key;
 }
 
-/// Cross-platform keyboard handler with accessibility support for blind users
-/// Handles F-key shortcuts, arrow navigation, and platform-specific activation patterns
+/// 8BitDo Micro gamepad button → SuperVision action mapping:
+///
+///  Gamepad Button  │  F-Key  │  SuperVision Action
+/// ─────────────────┼─────────┼─────────────────────
+///  R1              │  F1     │  Send with photo
+///  R2              │  F2     │  Toggle voice input
+///  Start           │  F3     │  New chat
+///  X               │  F4     │  What is this?
+///  A               │  F5     │  Describe room
+///  Y               │  F6     │  Read text
+///  B               │  F7     │  Tell me what you see
+///  Select          │  F8     │  Toggle settings
+///  L1              │  F9     │  Send text only
+///  L2              │  F10    │  Toggle messages
+///
+/// Cross-platform keyboard handler with accessibility support for blind users.
+/// Handles F-key / gamepad shortcuts, arrow navigation, and platform-specific
+/// activation patterns.
 class KeyboardHandler {
   final BuildContext _context;
   final GlobalKey<PromptBarState> _promptBarKey;
@@ -45,17 +61,17 @@ class KeyboardHandler {
     required VoidCallback onQuickAction4,
     required VoidCallback onToggleVoice,
   }) : _context = context,
-       _promptBarKey = promptBarKey,
-       _onToggleMessages = onToggleMessages,
-       _onToggleSettings = onToggleSettings,
-       _onNewChat = onNewChat,
-       _onQuickAction1 = onQuickAction1,
-       _onQuickAction2 = onQuickAction2,
-       _onQuickAction3 = onQuickAction3,
-       _onQuickAction4 = onQuickAction4,
-       _onToggleVoice = onToggleVoice;
+        _promptBarKey = promptBarKey,
+        _onToggleMessages = onToggleMessages,
+        _onToggleSettings = onToggleSettings,
+        _onNewChat = onNewChat,
+        _onQuickAction1 = onQuickAction1,
+        _onQuickAction2 = onQuickAction2,
+        _onQuickAction3 = onQuickAction3,
+        _onQuickAction4 = onQuickAction4,
+        _onToggleVoice = onToggleVoice;
 
-  /// Process keyboard shortcuts with ghost event prevention and state validation
+  /// Process keyboard / gamepad shortcuts with ghost event prevention
   void onShortcut(LogicalKeyboardKey key) {
     // Prevent processing ghost events (key not actually pressed)
     if (!HardwareKeyboard.instance.logicalKeysPressed.contains(key)) {
@@ -72,39 +88,58 @@ class KeyboardHandler {
     _pressedKeys.add(key);
 
     try {
-      // Function key mappings for blind user navigation
       switch (key) {
-        case LogicalKeyboardKey.f10:
-          _onToggleMessages(); // Show/hide message history
-          break;
-        case LogicalKeyboardKey.f9:
-          _promptBarKey.currentState?.sendTextOnly(); // Send text prompt
-          break;
-        case LogicalKeyboardKey.f8:
-          _onToggleSettings(); // Open settings
-          break;
+      // ── R1 ──────────────────────────────────────────────────────────────
         case LogicalKeyboardKey.f1:
-          _promptBarKey.currentState?.sendWithPhoto(); // Camera + prompt
+          _promptBarKey.currentState?.sendWithPhoto(); // Send with photo
           break;
+
+      // ── R2 ──────────────────────────────────────────────────────────────
         case LogicalKeyboardKey.f2:
-          _onToggleVoice(); // Toggle speech recognition
+          _onToggleVoice(); // Toggle voice input
           break;
+
+      // ── Start ────────────────────────────────────────────────────────────
         case LogicalKeyboardKey.f3:
-          _onNewChat(); // Reset chat session
+          _onNewChat(); // New chat
           break;
-        case LogicalKeyboardKey.f5:
-          _onQuickAction1(); // Describe room layout
-          break;
-        case LogicalKeyboardKey.f7:
-          _onQuickAction2(); // Tell me what you see
-          break;
+
+      // ── X ────────────────────────────────────────────────────────────────
         case LogicalKeyboardKey.f4:
           _onQuickAction3(); // What is this?
           break;
-        case LogicalKeyboardKey.f6:
-          _onQuickAction4(); // Read text in image
+
+      // ── A ────────────────────────────────────────────────────────────────
+        case LogicalKeyboardKey.f5:
+          _onQuickAction1(); // Describe room
           break;
-        // Accessibility navigation
+
+      // ── Y ────────────────────────────────────────────────────────────────
+        case LogicalKeyboardKey.f6:
+          _onQuickAction4(); // Read text
+          break;
+
+      // ── B ────────────────────────────────────────────────────────────────
+        case LogicalKeyboardKey.f7:
+          _onQuickAction2(); // Tell me what you see
+          break;
+
+      // ── Select ───────────────────────────────────────────────────────────
+        case LogicalKeyboardKey.f8:
+          _onToggleSettings(); // Toggle settings
+          break;
+
+      // ── L1 ───────────────────────────────────────────────────────────────
+        case LogicalKeyboardKey.f9:
+          _promptBarKey.currentState?.sendTextOnly(); // Send text only
+          break;
+
+      // ── L2 ───────────────────────────────────────────────────────────────
+        case LogicalKeyboardKey.f10:
+          _onToggleMessages(); // Toggle messages
+          break;
+
+      // ── Accessibility navigation ─────────────────────────────────────────
         case LogicalKeyboardKey.arrowUp:
         case LogicalKeyboardKey.arrowLeft:
           FocusScope.of(_context).previousFocus();
@@ -116,7 +151,6 @@ class KeyboardHandler {
         case LogicalKeyboardKey.enter:
         case LogicalKeyboardKey.select:
         case LogicalKeyboardKey.space:
-          // Handle button activation with platform-specific requirements
           if (_shouldActivateButton()) {
             _activateCurrentButton();
           }
@@ -194,43 +228,22 @@ class KeyboardHandler {
       LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
     },
 
-    // Function key shortcuts (cross-platform)
-    LogicalKeySet(LogicalKeyboardKey.f9): const GameIntent(
-      LogicalKeyboardKey.f9,
-    ),
-    LogicalKeySet(LogicalKeyboardKey.f10): const GameIntent(
-      LogicalKeyboardKey.f10,
-    ),
-    LogicalKeySet(LogicalKeyboardKey.f8): const GameIntent(
-      LogicalKeyboardKey.f8,
-    ),
-    LogicalKeySet(LogicalKeyboardKey.f1): const GameIntent(
-      LogicalKeyboardKey.f1,
-    ),
-    LogicalKeySet(LogicalKeyboardKey.f2): const GameIntent(
-      LogicalKeyboardKey.f2,
-    ),
-    LogicalKeySet(LogicalKeyboardKey.f5): const GameIntent(
-      LogicalKeyboardKey.f5,
-    ),
-    LogicalKeySet(LogicalKeyboardKey.f7): const GameIntent(
-      LogicalKeyboardKey.f7,
-    ),
-    LogicalKeySet(LogicalKeyboardKey.f4): const GameIntent(
-      LogicalKeyboardKey.f4,
-    ),
-    LogicalKeySet(LogicalKeyboardKey.f6): const GameIntent(
-      LogicalKeyboardKey.f6,
-    ),
-    LogicalKeySet(LogicalKeyboardKey.f3): const GameIntent(
-      LogicalKeyboardKey.f3,
-    ),
+    // 8BitDo Micro gamepad button shortcuts (cross-platform)
+    LogicalKeySet(LogicalKeyboardKey.f1):  const GameIntent(LogicalKeyboardKey.f1),  // R1  → Send with photo
+    LogicalKeySet(LogicalKeyboardKey.f2):  const GameIntent(LogicalKeyboardKey.f2),  // R2  → Toggle voice
+    LogicalKeySet(LogicalKeyboardKey.f3):  const GameIntent(LogicalKeyboardKey.f3),  // Start → New chat
+    LogicalKeySet(LogicalKeyboardKey.f4):  const GameIntent(LogicalKeyboardKey.f4),  // X   → What is this?
+    LogicalKeySet(LogicalKeyboardKey.f5):  const GameIntent(LogicalKeyboardKey.f5),  // A   → Describe room
+    LogicalKeySet(LogicalKeyboardKey.f6):  const GameIntent(LogicalKeyboardKey.f6),  // Y   → Read text
+    LogicalKeySet(LogicalKeyboardKey.f7):  const GameIntent(LogicalKeyboardKey.f7),  // B   → Tell me what you see
+    LogicalKeySet(LogicalKeyboardKey.f8):  const GameIntent(LogicalKeyboardKey.f8),  // Select → Toggle settings
+    LogicalKeySet(LogicalKeyboardKey.f9):  const GameIntent(LogicalKeyboardKey.f9),  // L1  → Send text only
+    LogicalKeySet(LogicalKeyboardKey.f10): const GameIntent(LogicalKeyboardKey.f10), // L2  → Toggle messages
   };
 
   /// Platform-specific action handlers with accessibility integration
   Map<Type, Action<Intent>> get actions => {
     if (_isIOS)
-      // iOS: Custom ActivateIntent handler for VoiceOver compatibility
       ActivateIntent: CallbackAction<ActivateIntent>(
         onInvoke: (_) {
           try {
@@ -242,7 +255,6 @@ class KeyboardHandler {
         },
       )
     else
-      // Android: ActivateIntent with fallback to registry
       ActivateIntent: CallbackAction<ActivateIntent>(
         onInvoke: (_) {
           try {
@@ -257,7 +269,7 @@ class KeyboardHandler {
         },
       ),
 
-    // Function key handler
+    // Gamepad (F-key) handler
     GameIntent: _createGameAction(),
   };
 

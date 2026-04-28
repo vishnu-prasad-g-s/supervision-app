@@ -69,7 +69,7 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       _hasChanges =
           _systemContextController.text.trim() != widget.systemContext.trim() ||
-          _selectedBackend != widget.backend;
+              _selectedBackend != widget.backend;
     });
   }
 
@@ -126,7 +126,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 _buildQuickActionsInfo(),
                 const SizedBox(height: 12),
                 ..._quickActionControllers.asMap().entries.map(
-                  (e) => Padding(
+                      (e) => Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: _buildQuickActionRow(e.key, e.value),
                   ),
@@ -479,18 +479,19 @@ class _SettingsPageState extends State<SettingsPage> {
 
   // ── Controller Table ───────────────────────────────────────────────────────
   Widget _buildShortcutsTable() {
+    // 8BitDo Micro button → F-key → SuperVision action
     const data = [
-      ('Right Bumper', 'F1', 'Send with photo'),
-      ('Right Trigger', 'F2', 'Toggle voice input'),
-      ('Plus button', 'F3', 'New chat'),
-      ('X button', 'F4', 'Quick action 1'),
-      ('A button', 'F5', 'Quick action 2'),
-      ('Y button', 'F6', 'Quick action 3'),
-      ('B button', 'F7', 'Quick action 4'),
-      ('Heart button', 'F8', 'Toggle settings'),
-      ('Left Bumper', 'F9', 'Send text only'),
-      ('Star button', 'F10', 'Toggle messages'),
-      ('Minus button', 'Enter', 'Activate'),
+      ('R1',     'F1',    'Send with photo'),
+      ('R2',     'F2',    'Toggle voice input'),
+      ('Start',  'F3',    'New chat'),
+      ('X',      'F4',    'What is this?'),
+      ('A',      'F5',    'Describe room'),
+      ('Y',      'F6',    'Read text'),
+      ('B',      'F7',    'Tell me what you see'),
+      ('Select', 'F8',    'Toggle settings'),
+      ('L1',     'F9',    'Send text only'),
+      ('L2',     'F10',   'Toggle messages'),
+      ('−',      'Enter', 'Activate'),
     ];
 
     return Column(
