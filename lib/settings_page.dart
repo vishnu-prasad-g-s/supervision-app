@@ -19,16 +19,9 @@ class _SettingsPageState extends State<SettingsPage> {
   late TextEditingController _systemContextController;
   late PreferredBackend _selectedBackend;
   bool _hasChanges = false;
-  double _fontSize = 15.0;
-  String _selectedLanguage = 'English';
   bool get _isAndroid => !kIsWeb && Platform.isAndroid;
 
   final FocusScopeNode _pageScope = FocusScopeNode();
-
-  final List<String> _languages = [
-    'English', 'Tamil', 'Hindi', 'Telugu', 'Malayalam',
-    'Kannada', 'Bengali', 'Marathi', 'Gujarati', 'Punjabi',
-  ];
 
   // Quick action labels - editable
   final List<TextEditingController> _quickActionControllers = [];
@@ -48,21 +41,6 @@ class _SettingsPageState extends State<SettingsPage> {
     for (final action in _defaultQuickActions) {
       _quickActionControllers.add(TextEditingController(text: action));
     }
-    _loadPrefs();
-  }
-
-  Future<void> _loadPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _fontSize = prefs.getDouble('font_size') ?? 15.0;
-      _selectedLanguage = prefs.getString('language') ?? 'English';
-    });
-  }
-
-  Future<void> _savePrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('font_size', _fontSize);
-    await prefs.setString('language', _selectedLanguage);
   }
 
   void _onChanged() {
@@ -78,12 +56,9 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _save() {
-    _savePrefs();
     Navigator.of(context).pop({
       'systemContext': _systemContextController.text.trim(),
       'backend': _selectedBackend,
-      'fontSize': _fontSize,
-      'language': _selectedLanguage,
     });
   }
 
@@ -98,56 +73,124 @@ class _SettingsPageState extends State<SettingsPage> {
     super.dispose();
   }
 
+  /// Handles controller arrow key presses to go back to the message interface.
+  /// Any arrow key (up/down/left/right) from the gamepad dismisses settings.
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      final key = event.logicalKey;
+      final isArrow = key == LogicalKeyboardKey.arrowUp ||
+          key == LogicalKeyboardKey.arrowDown ||
+          key == LogicalKeyboardKey.arrowLeft ||
+          key == LogicalKeyboardKey.arrowRight;
+
+      if (isArrow) {
+        // Arrow key pressed in settings → go back to message interface
+        debugPrint('SettingsPage: Arrow key pressed, navigating back');
+        Navigator.of(context).pop();
+        return KeyEventResult.handled;
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF07070F),
-      appBar: _buildAppBar(),
-      body: FocusScope(
-        node: _pageScope,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _section('AI Configuration', [
-                _buildSystemContext(),
-                const SizedBox(height: 12),
-                _buildBackendSelector(),
-              ]),
-              const SizedBox(height: 28),
-              _section('Appearance', [
-                _buildFontSizeSlider(),
-                const SizedBox(height: 12),
-                _buildLanguageSelector(),
-              ]),
-              const SizedBox(height: 28),
-              _section('Quick Actions', [
-                _buildQuickActionsInfo(),
-                const SizedBox(height: 12),
-                ..._quickActionControllers.asMap().entries.map(
-                      (e) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: _buildQuickActionRow(e.key, e.value),
-                  ),
+    return Focus(
+      // Intercept arrow keys at the top level so they always navigate back
+      onKeyEvent: _handleKeyEvent,
+      autofocus: true,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF07070F),
+        appBar: _buildAppBar(),
+        body: FocusScope(
+          node: _pageScope,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Arrow key hint banner
+                _buildArrowKeyHint(),
+                const SizedBox(height: 20),
+                _section(
+                  icon: Icons.psychology_outlined,
+                  title: 'AI Configuration',
+                  children: [
+                    _buildSystemContext(),
+                    _divider(),
+                    _buildBackendSelector(),
+                  ],
                 ),
-              ]),
-              const SizedBox(height: 28),
-              _section('Controller Layout', [_buildShortcutsTable()]),
-              const SizedBox(height: 28),
-              if (_isAndroid) ...[
-                _section('Accessibility', [_buildAccessibilityTip()]),
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
+                _section(
+                  icon: Icons.bolt_rounded,
+                  title: 'Quick Actions',
+                  children: [
+                    _buildQuickActionsInfo(),
+                    const SizedBox(height: 8),
+                    ..._quickActionControllers.asMap().entries.map(
+                          (e) => Column(
+                        children: [
+                          if (e.key != 0) _divider(),
+                          _buildQuickActionRow(e.key, e.value),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _section(
+                  icon: Icons.sports_esports_outlined,
+                  title: 'Controller Layout',
+                  children: [_buildShortcutsTable()],
+                ),
+                const SizedBox(height: 24),
+                if (_isAndroid) ...[
+                  _section(
+                    icon: Icons.accessibility_new_rounded,
+                    title: 'Accessibility',
+                    children: [_buildAccessibilityTip()],
+                  ),
+                  const SizedBox(height: 24),
+                ],
+                _buildActionRow(),
+                const SizedBox(height: 40),
               ],
-              _buildActionRow(),
-              const SizedBox(height: 40),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  // ── Arrow key hint ─────────────────────────────────────────────────────────
+  Widget _buildArrowKeyHint() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.07)),
+      ),
+      child: Row(children: [
+        const Icon(Icons.arrow_back_rounded, color: Colors.white38, size: 14),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            'Press any arrow button on the controller to go back to messages.',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.35),
+              fontSize: 12,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  // ── App Bar ────────────────────────────────────────────────────────────────
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       elevation: 0,
@@ -159,75 +202,128 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       title: const Text(
         'Settings',
-        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 0.3),
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 17,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+        ),
       ),
       actions: [
         if (_hasChanges)
-          TextButton(
-            onPressed: _save,
-            child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: TextButton(
+              onPressed: _save,
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              child: const Text(
+                'Save',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
           ),
-        const SizedBox(width: 8),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: Colors.white.withOpacity(0.07)),
+        child: Container(height: 1, color: Colors.white.withOpacity(0.06)),
       ),
     );
   }
 
   // ── Section wrapper ────────────────────────────────────────────────────────
-  Widget _section(String title, List<Widget> children) {
+  Widget _section({
+    required IconData icon,
+    required String title,
+    required List<Widget> children,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title.toUpperCase(),
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.35),
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
-          ),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
+          child: Row(children: [
+            Icon(icon, color: Colors.white38, size: 13),
+            const SizedBox(width: 6),
+            Text(
+              title.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white38,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.4,
+              ),
+            ),
+          ]),
         ),
-        const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF111118),
-            borderRadius: BorderRadius.circular(16),
+            color: const Color(0xFF0E0E18),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(color: Colors.white.withOpacity(0.07)),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Column(children: children),
+            borderRadius: BorderRadius.circular(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
           ),
         ),
       ],
     );
   }
 
+  Widget _divider() => Container(
+    height: 1,
+    color: Colors.white.withOpacity(0.05),
+  );
+
   // ── AI Configuration ───────────────────────────────────────────────────────
   Widget _buildSystemContext() {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            const Icon(Icons.psychology_outlined, color: Colors.white54, size: 16),
-            const SizedBox(width: 8),
-            const Text('System Context', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
-          ]),
+          const Text(
+            'System Context',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.1,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text('Guides how the AI responds to you', style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 12)),
-          const SizedBox(height: 12),
+          Text(
+            'Guides how the AI responds to you',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.35),
+              fontSize: 12,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 14),
           TextField(
             controller: _systemContextController,
             maxLines: 4,
-            style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.5),
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.85),
+              fontSize: 14,
+              height: 1.6,
+              letterSpacing: 0.1,
+            ),
             decoration: InputDecoration(
               hintText: 'Enter AI instructions…',
-              hintStyle: TextStyle(color: Colors.white.withOpacity(0.25), fontSize: 14),
+              hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 14),
               filled: true,
               fillColor: Colors.white.withOpacity(0.04),
               border: OutlineInputBorder(
@@ -240,7 +336,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.white30),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.25)),
               ),
               contentPadding: const EdgeInsets.all(14),
             ),
@@ -251,22 +347,37 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildBackendSelector() {
-    return Container(
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.white.withOpacity(0.07)))),
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
-          const Icon(Icons.memory_rounded, color: Colors.white54, size: 16),
-          const SizedBox(width: 10),
+          const Icon(Icons.memory_rounded, color: Colors.white38, size: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Processing Backend', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
-                Text('CPU is more compatible, GPU is faster', style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 12)),
+                const Text(
+                  'Processing Backend',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.1,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'CPU is more compatible · GPU is faster',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.35),
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
+          const SizedBox(width: 12),
           _buildBackendToggle(),
         ],
       ),
@@ -275,9 +386,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildBackendToggle() {
     return Container(
-      height: 36,
+      height: 34,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
+        color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
@@ -297,124 +408,20 @@ class _SettingsPageState extends State<SettingsPage> {
       onTap: () => _onBackendChanged(b),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
           color: selected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Text(label, style: TextStyle(
-          color: selected ? Colors.black : Colors.white54,
-          fontSize: 13, fontWeight: FontWeight.w600,
-        )),
-      ),
-    );
-  }
-
-  // ── Appearance ─────────────────────────────────────────────────────────────
-  Widget _buildFontSizeSlider() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(children: [
-            const Icon(Icons.text_fields_rounded, color: Colors.white54, size: 16),
-            const SizedBox(width: 8),
-            const Text('Font Size', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                _fontSize == 13 ? 'Small' : _fontSize == 15 ? 'Medium' : _fontSize == 18 ? 'Large' : 'Custom',
-                style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
-              ),
-            ),
-          ]),
-          const SizedBox(height: 12),
-          Row(children: [
-            Text('A', style: TextStyle(color: Colors.white38, fontSize: 12)),
-            Expanded(
-              child: SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: Colors.white,
-                  inactiveTrackColor: Colors.white12,
-                  thumbColor: Colors.white,
-                  overlayColor: Colors.white10,
-                  trackHeight: 2,
-                ),
-                child: Slider(
-                  value: _fontSize,
-                  min: 13, max: 20, divisions: 7,
-                  onChanged: (v) => setState(() { _fontSize = v; _hasChanges = true; }),
-                ),
-              ),
-            ),
-            Text('A', style: TextStyle(color: Colors.white38, fontSize: 20)),
-          ]),
-          // Preview text
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.04),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withOpacity(0.06)),
-            ),
-            child: Text(
-              'This is how your chat text will look.',
-              style: TextStyle(color: Colors.white70, fontSize: _fontSize, height: 1.5),
-            ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.black : Colors.white38,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.3,
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLanguageSelector() {
-    return Container(
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.white.withOpacity(0.07)))),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          const Icon(Icons.language_rounded, color: Colors.white54, size: 16),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Response Language', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
-                Text('AI will respond in this language', style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 12)),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedLanguage,
-                dropdownColor: const Color(0xFF1A1A2E),
-                isDense: true,
-                icon: const Icon(Icons.expand_more_rounded, color: Colors.white54, size: 16),
-                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
-                items: _languages.map((l) => DropdownMenuItem(
-                  value: l,
-                  child: Text(l, style: const TextStyle(color: Colors.white, fontSize: 13)),
-                )).toList(),
-                onChanged: (v) { if (v != null) setState(() { _selectedLanguage = v; _hasChanges = true; }); },
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -423,103 +430,174 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildQuickActionsInfo() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Row(children: [
-        const Icon(Icons.bolt_rounded, color: Colors.white54, size: 16),
-        const SizedBox(width: 8),
-        Expanded(child: Text(
-          'Shortcuts triggered by controller buttons F4–F7. Tap to rename.',
-          style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 12, height: 1.4),
-        )),
-      ]),
+      child: Text(
+        'Triggered by controller buttons X · A · Y · B — tap any label to rename.',
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.3),
+          fontSize: 12,
+          height: 1.5,
+        ),
+      ),
     );
   }
 
   Widget _buildQuickActionRow(int index, TextEditingController ctrl) {
-    final icons = [Icons.help_outline_rounded, Icons.meeting_room_outlined, Icons.text_fields_rounded, Icons.visibility_outlined];
-    final keys = ['F4', 'F5', 'F6', 'F7'];
+    final icons = [
+      Icons.help_outline_rounded,
+      Icons.meeting_room_outlined,
+      Icons.text_fields_rounded,
+      Icons.visibility_outlined,
+    ];
+    final buttons = ['X', 'A', 'Y', 'B'];
+    final buttonColors = [
+      Colors.blue.shade300,
+      Colors.green.shade300,
+      Colors.amber.shade300,
+      Colors.red.shade300,
+    ];
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(children: [
         Container(
-          width: 32, height: 32,
+          width: 34, height: 34,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.06),
-            borderRadius: BorderRadius.circular(8),
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icons[index], color: Colors.white54, size: 15),
+          child: Icon(icons[index], color: Colors.white38, size: 16),
         ),
         const SizedBox(width: 10),
         Container(
-          width: 32, height: 20,
+          width: 26, height: 26,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.04),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            color: buttonColors[index].withOpacity(0.15),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: buttonColors[index].withOpacity(0.3)),
           ),
-          child: Center(child: Text(keys[index], style: const TextStyle(color: Colors.white38, fontSize: 10, fontFamily: 'monospace', fontWeight: FontWeight.bold))),
+          child: Center(
+            child: Text(
+              buttons[index],
+              style: TextStyle(
+                color: buttonColors[index],
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 12),
         Expanded(
           child: TextField(
             controller: ctrl,
-            style: const TextStyle(color: Colors.white, fontSize: 13),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.1,
+            ),
             decoration: InputDecoration(
               isDense: true,
               hintText: 'Action label…',
-              hintStyle: TextStyle(color: Colors.white.withOpacity(0.25), fontSize: 13),
+              hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 14),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(vertical: 6),
             ),
             onChanged: (_) => setState(() => _hasChanges = true),
           ),
         ),
+        Icon(Icons.edit_rounded, color: Colors.white.withOpacity(0.15), size: 14),
       ]),
     );
   }
 
   // ── Controller Table ───────────────────────────────────────────────────────
   Widget _buildShortcutsTable() {
-    // 8BitDo Micro button → F-key → SuperVision action
     const data = [
-      ('R1',     'F1',    'Send with photo'),
-      ('R2',     'F2',    'Toggle voice input'),
-      ('Start',  'F3',    'New chat'),
-      ('X',      'F4',    'What is this?'),
-      ('A',      'F5',    'Describe room'),
-      ('Y',      'F6',    'Read text'),
-      ('B',      'F7',    'Tell me what you see'),
-      ('Select', 'F8',    'Toggle settings'),
-      ('L1',     'F9',    'Send text only'),
-      ('L2',     'F10',   'Toggle messages'),
-      ('−',      'Enter', 'Activate'),
+      ('R1',     'Send with photo'),
+      ('R2',     'Toggle voice input'),
+      ('Start',  'New chat'),
+      ('X',      'What is this?'),
+      ('A',      'Describe room'),
+      ('Y',      'Read text'),
+      ('B',      'Tell me what you see'),
+      ('Select', 'Toggle settings'),
+      ('L1',     'Send text only'),
+      ('L2',     'Hide / show messages'),
+      ('↑↓←→',  'Go back to messages'),
+      ('−',      'Activate focused button'),
     ];
 
     return Column(
       children: [
-        // Header
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          color: Colors.white.withOpacity(0.04),
+          color: Colors.white.withOpacity(0.03),
           child: Row(children: [
-            Expanded(flex: 3, child: Text('Button', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5))),
-            SizedBox(width: 40, child: Text('Key', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5))),
-            Expanded(flex: 2, child: Text('Action', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5))),
+            Expanded(
+              flex: 2,
+              child: Text(
+                'BUTTON',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.3),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Text(
+                'ACTION',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.3),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ),
           ]),
         ),
         ...data.map((row) => Container(
-          decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05)))),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.white.withOpacity(0.04))),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           child: Row(children: [
-            Expanded(flex: 3, child: Text(row.$1, style: const TextStyle(color: Colors.white70, fontSize: 13))),
-            SizedBox(width: 40, child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.06),
-                borderRadius: BorderRadius.circular(4),
+            Expanded(
+              flex: 2,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  row.$1,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'monospace',
+                  ),
+                ),
               ),
-              child: Text(row.$2, style: const TextStyle(color: Colors.white60, fontSize: 11, fontFamily: 'monospace', fontWeight: FontWeight.bold)),
-            )),
-            Expanded(flex: 2, child: Text(row.$3, style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13))),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 3,
+              child: Text(
+                row.$2,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  height: 1.3,
+                ),
+              ),
+            ),
           ]),
         )),
       ],
@@ -533,12 +611,16 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lightbulb_outline_rounded, color: Colors.white38, size: 16),
+          const Icon(Icons.lightbulb_outline_rounded, color: Colors.amber, size: 15),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'For best controller experience, temporarily disable Android TalkBack in Accessibility settings.',
-              style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 13, height: 1.5),
+              'For the best controller experience, temporarily disable Android TalkBack in Accessibility settings.',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.45),
+                fontSize: 13,
+                height: 1.6,
+              ),
             ),
           ),
         ],
@@ -553,12 +635,22 @@ class _SettingsPageState extends State<SettingsPage> {
         child: GestureDetector(
           onTap: _cancel,
           child: Container(
-            height: 50,
+            height: 52,
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.white.withOpacity(0.12)),
+              border: Border.all(color: Colors.white.withOpacity(0.1)),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Center(child: Text('Cancel', style: TextStyle(color: Colors.white60, fontWeight: FontWeight.w500, fontSize: 15))),
+            child: Center(
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -568,18 +660,22 @@ class _SettingsPageState extends State<SettingsPage> {
           onTap: _hasChanges ? _save : null,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            height: 50,
+            height: 52,
             decoration: BoxDecoration(
-              color: _hasChanges ? Colors.white : Colors.white.withOpacity(0.08),
+              color: _hasChanges ? Colors.white : Colors.white.withOpacity(0.06),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Center(child: Text(
-              'Save Changes',
-              style: TextStyle(
-                color: _hasChanges ? Colors.black : Colors.white30,
-                fontWeight: FontWeight.w600, fontSize: 15,
+            child: Center(
+              child: Text(
+                'Save Changes',
+                style: TextStyle(
+                  color: _hasChanges ? Colors.black : Colors.white.withOpacity(0.2),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  letterSpacing: 0.2,
+                ),
               ),
-            )),
+            ),
           ),
         ),
       ),

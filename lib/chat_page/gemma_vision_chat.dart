@@ -18,6 +18,7 @@ import 'widgets/chat_ui_builder.dart';
 import '../settings_page.dart';
 import 'widgets/semantic_button_registry.dart';
 import 'config/system_prompts.dart';
+import 'services/announcement_service.dart';
 
 /// Main chat interface with AI vision model - handles bootstrap and lifecycle management
 class ChatPage extends StatefulWidget {
@@ -144,6 +145,13 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             setState(() => _showMessages = !_showMessages);
             if (_showMessages) {
               _scrollToBottom(force: true);
+              Future.delayed(const Duration(milliseconds: 400), () {
+                AnnouncementService.instance.announceMessagesShown();
+              });
+            } else {
+              Future.delayed(const Duration(milliseconds: 400), () {
+                AnnouncementService.instance.announceMessagesHidden();
+              });
             }
           }
         },
@@ -184,6 +192,9 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         _rootFocus.requestFocus();
         _fadeController.forward();
         _slideController.forward();
+        // Announce app is ready to blind users
+        await AnnouncementService.instance.initialize();
+        await AnnouncementService.instance.announceReady();
       }
     } catch (e) {
       debugPrint("Gemma service initialization failed: $e");
@@ -235,8 +246,12 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   }
 
   /* Chat operation wrappers with null safety */
-  Future<void> _newChat() async =>
-      await _chatHelpers!.newChat(_msgs, _promptBarKey);
+  Future<void> _newChat() async {
+    await _chatHelpers!.newChat(_msgs, _promptBarKey);
+    Future.delayed(const Duration(milliseconds: 300), () {
+      AnnouncementService.instance.announceNewChat();
+    });
+  }
 
   Future<void> _captureAndSend(String prompt) async =>
       await _chatHelpers!.captureAndSend(prompt, _msgs);
@@ -313,6 +328,13 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                               );
                               if (_showMessages) {
                                 _scrollToBottom(force: true);
+                                Future.delayed(const Duration(milliseconds: 400), () {
+                                  AnnouncementService.instance.announceMessagesShown();
+                                });
+                              } else {
+                                Future.delayed(const Duration(milliseconds: 400), () {
+                                  AnnouncementService.instance.announceMessagesHidden();
+                                });
                               }
                             },
                             onNewChat: _newChat,
@@ -451,6 +473,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   Future<void> _navigateToSettings() async {
     if (_disposed || !mounted) return;
 
+    AnnouncementService.instance.announceSettingsOpened();
+    await Future.delayed(const Duration(milliseconds: 800));
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
         builder: (context) =>
@@ -458,6 +482,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       ),
     );
 
+    AnnouncementService.instance.announceSettingsClosed();
     if (result != null && mounted && !_disposed) {
       final newSystemContext = result['systemContext'] as String?;
       final newBackend = result['backend'] as PreferredBackend?;

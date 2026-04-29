@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../widgets/prompt_bar.dart';
 import '../widgets/semantic_button_registry.dart';
 
-/// Custom intent for function key shortcuts that bypass text field focus
+/// Custom intent for gamepad button shortcuts that bypass text field focus
 class GameIntent extends Intent {
   const GameIntent(this.key);
   final LogicalKeyboardKey key;
@@ -14,38 +14,34 @@ class GameIntent extends Intent {
 
 /// 8BitDo Micro gamepad button → SuperVision action mapping:
 ///
-///  Gamepad Button  │  F-Key  │  SuperVision Action
-/// ─────────────────┼─────────┼─────────────────────
-///  R1              │  F1     │  Send with photo
-///  R2              │  F2     │  Toggle voice input
-///  Start           │  F3     │  New chat
-///  X               │  F4     │  What is this?
-///  A               │  F5     │  Describe room
-///  Y               │  F6     │  Read text
-///  B               │  F7     │  Tell me what you see
-///  Select          │  F8     │  Toggle settings
-///  L1              │  F9     │  Send text only
-///  L2              │  F10    │  Toggle messages
+///  Gamepad Button   │  getevent code   │  SuperVision Action
+/// ──────────────────┼──────────────────┼──────────────────────────
+///  R1  (BTN_TR)     │  gameButtonRight1│  Send with photo
+///  R2  (ABS_RZ)     │  gameButtonRight2│  Toggle voice input
+///  Start            │  gameButtonStart │  New chat
+///  X   (BTN_WEST)   │  gameButtonX     │  What is this?
+///  A   (BTN_GAMEPAD)│  gameButtonA     │  Describe room
+///  Y   (BTN_NORTH)  │  gameButtonY     │  Read text
+///  B   (BTN_EAST)   │  gameButtonB     │  Tell me what you see
+///  Select           │  gameButtonSelect│  Toggle settings
+///  L1  (BTN_TL)     │  gameButtonLeft1 │  Send text only
+///  L2  (ABS_Z)      │  gameButtonLeft2 │  Hide / show messages
 ///
-/// Cross-platform keyboard handler with accessibility support for blind users.
-/// Handles F-key / gamepad shortcuts, arrow navigation, and platform-specific
-/// activation patterns.
 class KeyboardHandler {
   final BuildContext _context;
   final GlobalKey<PromptBarState> _promptBarKey;
-  final VoidCallback _onToggleMessages;
-  final VoidCallback _onToggleSettings;
-  final VoidCallback _onNewChat;
-  final VoidCallback _onQuickAction1;
-  final VoidCallback _onQuickAction2;
-  final VoidCallback _onQuickAction3;
-  final VoidCallback _onQuickAction4;
-  final VoidCallback _onToggleVoice;
+  final VoidCallback _onToggleMessages;   // L2  → hide/show messages
+  final VoidCallback _onToggleSettings;   // Select → open/close settings
+  final VoidCallback _onNewChat;          // Start → new chat
+  final VoidCallback _onQuickAction1;     // A → describe room
+  final VoidCallback _onQuickAction2;     // B → tell me what you see
+  final VoidCallback _onQuickAction3;     // X → what is this?
+  final VoidCallback _onQuickAction4;     // Y → read text
+  final VoidCallback _onToggleVoice;      // R2 → toggle voice input
 
   /// Prevent duplicate key event processing
   final Set<LogicalKeyboardKey> _pressedKeys = <LogicalKeyboardKey>{};
 
-  /// Platform-specific behavior flags
   bool get _isIOS => !kIsWeb && Platform.isIOS;
 
   KeyboardHandler({
@@ -71,15 +67,13 @@ class KeyboardHandler {
         _onQuickAction4 = onQuickAction4,
         _onToggleVoice = onToggleVoice;
 
-  /// Process keyboard / gamepad shortcuts with ghost event prevention
+  /// Process gamepad / keyboard shortcuts with ghost event prevention
   void onShortcut(LogicalKeyboardKey key) {
-    // Prevent processing ghost events (key not actually pressed)
     if (!HardwareKeyboard.instance.logicalKeysPressed.contains(key)) {
       debugPrint('KeyboardHandler: Ignoring ghost key event for $key');
       return;
     }
 
-    // Debounce: prevent rapid duplicate key processing
     if (_pressedKeys.contains(key)) {
       debugPrint('KeyboardHandler: Key $key already being processed');
       return;
@@ -88,112 +82,102 @@ class KeyboardHandler {
     _pressedKeys.add(key);
 
     try {
-      switch (key) {
-      // ── R1 ──────────────────────────────────────────────────────────────
-        case LogicalKeyboardKey.f1:
-          _promptBarKey.currentState?.sendWithPhoto(); // Send with photo
-          break;
+      // ── 8BitDo Micro gamepad buttons ──────────────────────────────────────
+      if (key == LogicalKeyboardKey.gameButtonRight1) {
+        // R1 → Send with photo
+        _promptBarKey.currentState?.sendWithPhoto();
 
-      // ── R2 ──────────────────────────────────────────────────────────────
-        case LogicalKeyboardKey.f2:
-          _onToggleVoice(); // Toggle voice input
-          break;
+      } else if (key == LogicalKeyboardKey.gameButtonRight2 ||
+          key == LogicalKeyboardKey.gameButtonThumbRight) {
+        // R2 → Toggle voice input
+        // Note: R2 (ABS_RZ) is an analog trigger — Flutter may fire it as
+        // gameButtonRight2 OR gameButtonThumbRight depending on Android version.
+        // Both are mapped here as a fallback.
+        _onToggleVoice();
 
-      // ── Start ────────────────────────────────────────────────────────────
-        case LogicalKeyboardKey.f3:
-          _onNewChat(); // New chat
-          break;
+      } else if (key == LogicalKeyboardKey.gameButtonStart) {
+        // Start → New chat
+        _onNewChat();
 
-      // ── X ────────────────────────────────────────────────────────────────
-        case LogicalKeyboardKey.f4:
-          _onQuickAction3(); // What is this?
-          break;
+      } else if (key == LogicalKeyboardKey.gameButtonX) {
+        // X → What is this?
+        _onQuickAction3();
 
-      // ── A ────────────────────────────────────────────────────────────────
-        case LogicalKeyboardKey.f5:
-          _onQuickAction1(); // Describe room
-          break;
+      } else if (key == LogicalKeyboardKey.gameButtonA) {
+        // A → Describe room
+        _onQuickAction1();
 
-      // ── Y ────────────────────────────────────────────────────────────────
-        case LogicalKeyboardKey.f6:
-          _onQuickAction4(); // Read text
-          break;
+      } else if (key == LogicalKeyboardKey.gameButtonY) {
+        // Y → Read text
+        _onQuickAction4();
 
-      // ── B ────────────────────────────────────────────────────────────────
-        case LogicalKeyboardKey.f7:
-          _onQuickAction2(); // Tell me what you see
-          break;
+      } else if (key == LogicalKeyboardKey.gameButtonB) {
+        // B → Tell me what you see
+        _onQuickAction2();
 
-      // ── Select ───────────────────────────────────────────────────────────
-        case LogicalKeyboardKey.f8:
-          _onToggleSettings(); // Toggle settings
-          break;
+      } else if (key == LogicalKeyboardKey.gameButtonSelect) {
+        // Select → Toggle settings
+        _onToggleSettings();
 
-      // ── L1 ───────────────────────────────────────────────────────────────
-        case LogicalKeyboardKey.f9:
-          _promptBarKey.currentState?.sendTextOnly(); // Send text only
-          break;
+      } else if (key == LogicalKeyboardKey.gameButtonLeft1) {
+        // L1 → Send text only
+        _promptBarKey.currentState?.sendTextOnly();
 
-      // ── L2 ───────────────────────────────────────────────────────────────
-        case LogicalKeyboardKey.f10:
-          _onToggleMessages(); // Toggle messages
-          break;
+      } else if (key == LogicalKeyboardKey.gameButtonLeft2 ||
+          key == LogicalKeyboardKey.gameButtonThumbLeft) {
+        // L2 → Hide / show messages
+        // Same dual-mapping fallback as R2 above.
+        _onToggleMessages();
 
-      // ── Accessibility navigation ─────────────────────────────────────────
-        case LogicalKeyboardKey.arrowUp:
-        case LogicalKeyboardKey.arrowLeft:
-          FocusScope.of(_context).previousFocus();
-          break;
-        case LogicalKeyboardKey.arrowDown:
-        case LogicalKeyboardKey.arrowRight:
-          FocusScope.of(_context).nextFocus();
-          break;
-        case LogicalKeyboardKey.enter:
-        case LogicalKeyboardKey.select:
-        case LogicalKeyboardKey.space:
-          if (_shouldActivateButton()) {
-            _activateCurrentButton();
-          }
-          break;
+      } else if (key == LogicalKeyboardKey.gameButtonMode) {
+        // Mode → Hide / show messages (extra fallback)
+        _onToggleMessages();
+
+        // ── Accessibility navigation ─────────────────────────────────────────
+      } else if (key == LogicalKeyboardKey.arrowUp ||
+          key == LogicalKeyboardKey.arrowLeft) {
+        FocusScope.of(_context).previousFocus();
+
+      } else if (key == LogicalKeyboardKey.arrowDown ||
+          key == LogicalKeyboardKey.arrowRight) {
+        FocusScope.of(_context).nextFocus();
+
+      } else if (key == LogicalKeyboardKey.enter ||
+          key == LogicalKeyboardKey.select ||
+          key == LogicalKeyboardKey.space) {
+        if (_shouldActivateButton()) {
+          _activateCurrentButton();
+        }
       }
     } finally {
-      // Debounce cleanup: allow key to be processed again after delay
       Future.delayed(const Duration(milliseconds: 100), () {
         _pressedKeys.remove(key);
       });
     }
   }
 
-  /// Platform-specific button activation logic (iOS VoiceOver vs Android TalkBack)
   bool _shouldActivateButton() {
     if (_isIOS) {
-      // iOS VoiceOver requires Ctrl + Alt + Space for activation
       return HardwareKeyboard.instance.isControlPressed &&
           HardwareKeyboard.instance.isAltPressed;
     } else {
-      // Android TalkBack: Enter, Space, or Select activate buttons
       return true;
     }
   }
 
-  /// Activate currently focused semantic button
   void _activateCurrentButton() {
     SemanticButtonRegistry.invokeCurrentSemanticTap();
   }
 
-  /// Create validated action handler with error handling
   CallbackAction<GameIntent> _createGameAction() {
     return CallbackAction<GameIntent>(
       onInvoke: (intent) {
         try {
           final key = intent.key;
-
-          // Double-check key validity at action level
           if (!HardwareKeyboard.instance.logicalKeysPressed.contains(key)) {
             debugPrint('GameIntent: Ignoring invalid key event for $key');
             return null;
           }
-
           onShortcut(key);
           return null;
         } catch (e) {
@@ -204,44 +188,43 @@ class KeyboardHandler {
     );
   }
 
-  /// Platform-specific keyboard shortcut mappings
   Map<LogicalKeySet, Intent> get shortcuts => {
     if (_isIOS) ...{
-      // iOS: VoiceOver-specific navigation shortcuts
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const NextFocusIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown):  const NextFocusIntent(),
       LogicalKeySet(LogicalKeyboardKey.arrowRight): const NextFocusIntent(),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const PreviousFocusIntent(),
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const PreviousFocusIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp):    const PreviousFocusIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft):  const PreviousFocusIntent(),
       LogicalKeySet(
         LogicalKeyboardKey.control,
         LogicalKeyboardKey.alt,
         LogicalKeyboardKey.space,
       ): const ActivateIntent(),
     } else ...{
-      // Android: TalkBack-compatible navigation
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const NextFocusIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown):  const NextFocusIntent(),
       LogicalKeySet(LogicalKeyboardKey.arrowRight): const NextFocusIntent(),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const PreviousFocusIntent(),
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const PreviousFocusIntent(),
-      LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp):    const PreviousFocusIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft):  const PreviousFocusIntent(),
+      LogicalKeySet(LogicalKeyboardKey.enter):  const ActivateIntent(),
       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
-      LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
+      LogicalKeySet(LogicalKeyboardKey.space):  const ActivateIntent(),
     },
 
-    // 8BitDo Micro gamepad button shortcuts (cross-platform)
-    LogicalKeySet(LogicalKeyboardKey.f1):  const GameIntent(LogicalKeyboardKey.f1),  // R1  → Send with photo
-    LogicalKeySet(LogicalKeyboardKey.f2):  const GameIntent(LogicalKeyboardKey.f2),  // R2  → Toggle voice
-    LogicalKeySet(LogicalKeyboardKey.f3):  const GameIntent(LogicalKeyboardKey.f3),  // Start → New chat
-    LogicalKeySet(LogicalKeyboardKey.f4):  const GameIntent(LogicalKeyboardKey.f4),  // X   → What is this?
-    LogicalKeySet(LogicalKeyboardKey.f5):  const GameIntent(LogicalKeyboardKey.f5),  // A   → Describe room
-    LogicalKeySet(LogicalKeyboardKey.f6):  const GameIntent(LogicalKeyboardKey.f6),  // Y   → Read text
-    LogicalKeySet(LogicalKeyboardKey.f7):  const GameIntent(LogicalKeyboardKey.f7),  // B   → Tell me what you see
-    LogicalKeySet(LogicalKeyboardKey.f8):  const GameIntent(LogicalKeyboardKey.f8),  // Select → Toggle settings
-    LogicalKeySet(LogicalKeyboardKey.f9):  const GameIntent(LogicalKeyboardKey.f9),  // L1  → Send text only
-    LogicalKeySet(LogicalKeyboardKey.f10): const GameIntent(LogicalKeyboardKey.f10), // L2  → Toggle messages
+    // 8BitDo Micro gamepad buttons
+    LogicalKeySet(LogicalKeyboardKey.gameButtonRight1):    const GameIntent(LogicalKeyboardKey.gameButtonRight1),    // R1
+    LogicalKeySet(LogicalKeyboardKey.gameButtonRight2):    const GameIntent(LogicalKeyboardKey.gameButtonRight2),    // R2
+    LogicalKeySet(LogicalKeyboardKey.gameButtonThumbRight):const GameIntent(LogicalKeyboardKey.gameButtonThumbRight),// R2 fallback
+    LogicalKeySet(LogicalKeyboardKey.gameButtonStart):     const GameIntent(LogicalKeyboardKey.gameButtonStart),     // Start
+    LogicalKeySet(LogicalKeyboardKey.gameButtonX):         const GameIntent(LogicalKeyboardKey.gameButtonX),         // X
+    LogicalKeySet(LogicalKeyboardKey.gameButtonA):         const GameIntent(LogicalKeyboardKey.gameButtonA),         // A
+    LogicalKeySet(LogicalKeyboardKey.gameButtonY):         const GameIntent(LogicalKeyboardKey.gameButtonY),         // Y
+    LogicalKeySet(LogicalKeyboardKey.gameButtonB):         const GameIntent(LogicalKeyboardKey.gameButtonB),         // B
+    LogicalKeySet(LogicalKeyboardKey.gameButtonSelect):    const GameIntent(LogicalKeyboardKey.gameButtonSelect),    // Select
+    LogicalKeySet(LogicalKeyboardKey.gameButtonLeft1):     const GameIntent(LogicalKeyboardKey.gameButtonLeft1),     // L1
+    LogicalKeySet(LogicalKeyboardKey.gameButtonLeft2):     const GameIntent(LogicalKeyboardKey.gameButtonLeft2),     // L2
+    LogicalKeySet(LogicalKeyboardKey.gameButtonThumbLeft): const GameIntent(LogicalKeyboardKey.gameButtonThumbLeft), // L2 fallback
+    LogicalKeySet(LogicalKeyboardKey.gameButtonMode):      const GameIntent(LogicalKeyboardKey.gameButtonMode),      // Mode
   };
 
-  /// Platform-specific action handlers with accessibility integration
   Map<Type, Action<Intent>> get actions => {
     if (_isIOS)
       ActivateIntent: CallbackAction<ActivateIntent>(
@@ -269,7 +252,6 @@ class KeyboardHandler {
         },
       ),
 
-    // Gamepad (F-key) handler
     GameIntent: _createGameAction(),
   };
 

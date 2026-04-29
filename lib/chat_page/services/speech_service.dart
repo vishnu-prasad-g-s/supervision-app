@@ -8,6 +8,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../widgets/prompt_bar.dart';
+import 'announcement_service.dart';
 import 'sound_manager.dart';
 
 /// Speech services for blind users: dictation, TTS announcements, and audio feedback
@@ -106,6 +107,7 @@ class SpeechService {
     }
 
     await _playDictationStartSound();
+    await AnnouncementService.instance.announceListening();
     _listenAgain(); // Start the actual speech recognition
   }
 
@@ -118,6 +120,9 @@ class SpeechService {
       _listening = false;
       await _speech.stop();
       await _playDictationStopSound();
+      Future.delayed(const Duration(milliseconds: 500), () {
+        AnnouncementService.instance.announceStoppedListening();
+      });
 
       // Read back the dictated text unless user already sent the message
       final currentText = _promptBarKey.currentState?.currentText ?? '';
