@@ -30,3 +30,7 @@ local.properties
 .vscode/settings.json
 *.swp
 .DS_Store
+
+
+.kotlin/
+*.py
