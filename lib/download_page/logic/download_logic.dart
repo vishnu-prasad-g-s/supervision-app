@@ -704,4 +704,11 @@ class DownloadPageLogic {
     setShowAgreementSheet(false);
     setDownloadStatus(DownloadStatus.notStarted);
   }
+
+  /// Called when app returns to foreground after license acceptance.
+  /// Automatically retries the download check.
+  Future<void> retryAfterLicenseAcceptance() async {
+    Logger.info('App resumed - retrying download after license acceptance');
+    await startDownload();
+  }
 }

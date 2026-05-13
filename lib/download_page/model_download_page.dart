@@ -26,7 +26,7 @@ class ModelDownloadPage extends StatefulWidget {
 }
 
 class _ModelDownloadPageState extends State<ModelDownloadPage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   // Current status of the download process (notStarted, downloading, completed, etc.)
   DownloadStatus _downloadStatus = DownloadStatus.notStarted;
 
@@ -57,11 +57,33 @@ class _ModelDownloadPageState extends State<ModelDownloadPage>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initializeAnimations();
     _initializeLogic();
     _initializeDownloader();
     _checkDownloadState();
     _setupLogListener();
+  }
+
+  bool _isRetryingLicense = false;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        _downloadStatus == DownloadStatus.awaitingLicenseAcceptance &&
+        !_isRetryingLicense) {
+      _isRetryingLicense = true;
+      Logger.info('App resumed from license page - retrying once');
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (mounted) {
+          _logic.retryAfterLicenseAcceptance();
+          // Reset flag after 5 seconds so user can retry manually if needed
+          Future.delayed(const Duration(seconds: 5), () {
+            _isRetryingLicense = false;
+          });
+        }
+      });
+    }
   }
 
   /// Sets up ambient background animations for visual depth.
@@ -94,6 +116,7 @@ class _ModelDownloadPageState extends State<ModelDownloadPage>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _logSubscription.cancel();
     _logic.dispose();
     _orb1Controller.dispose();

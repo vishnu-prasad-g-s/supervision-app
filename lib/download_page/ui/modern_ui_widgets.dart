@@ -182,7 +182,7 @@ class ModernUIWidgets {
       case DownloadStatus.downloading:
         title = "Downloading";
         subtitle =
-            "This may take a few minutes to half an hour on slower connections - please do not close the app. The progress bar updates in increments and may seem frozen at times, but the download is still working.";
+            "Please keep the app open. Progress may seem slow at times — the download is still running.";
         break;
       case DownloadStatus.paused:
         title = "Download Paused";
